@@ -5,23 +5,17 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { FacebookClient } from "./facebook-client.js";
 
-const accessToken = process.env.FACEBOOK_ACCESS_TOKEN;
-if (!accessToken) {
-  console.error(
-    "Error: FACEBOOK_ACCESS_TOKEN environment variable is required.\n" +
-      "Get a token from https://developers.facebook.com/tools/explorer/"
-  );
-  process.exit(1);
+export function createServer(fb: FacebookClient): McpServer {
+  const server = new McpServer({
+    name: "facebook",
+    version: "1.0.0",
+  });
+
+  registerTools(server, fb);
+  return server;
 }
 
-const fb = new FacebookClient({ accessToken });
-
-const server = new McpServer({
-  name: "facebook",
-  version: "1.0.0",
-});
-
-// ── Tools ───────────────────────────────────────────────────────────────
+function registerTools(server: McpServer, fb: FacebookClient): void {
 
 server.tool(
   "get_profile",
@@ -234,15 +228,34 @@ server.tool(
   }
 );
 
+} // end registerTools
+
 // ── Start ───────────────────────────────────────────────────────────────
 
 async function main() {
+  const accessToken = process.env.FACEBOOK_ACCESS_TOKEN;
+  if (!accessToken) {
+    console.error(
+      "Error: FACEBOOK_ACCESS_TOKEN environment variable is required.\n" +
+        "Get a token from https://developers.facebook.com/tools/explorer/"
+    );
+    process.exit(1);
+  }
+
+  const fb = new FacebookClient({ accessToken });
+  const server = createServer(fb);
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("Facebook MCP server running on stdio");
 }
 
-main().catch((error) => {
-  console.error("Fatal error:", error);
-  process.exit(1);
-});
+const isMainModule =
+  process.argv[1] &&
+  import.meta.url === `file://${process.argv[1]}`;
+
+if (isMainModule) {
+  main().catch((error) => {
+    console.error("Fatal error:", error);
+    process.exit(1);
+  });
+}

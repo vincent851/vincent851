@@ -14,10 +14,16 @@
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
+    "test": "vitest run",
     "start": "node dist/index.js",
     "dev": "tsc --watch"
   },
-  "keywords": ["mcp", "facebook", "graph-api", "model-context-protocol"],
+  "keywords": [
+    "mcp",
+    "facebook",
+    "graph-api",
+    "model-context-protocol"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -25,6 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.3"
   }
 }
